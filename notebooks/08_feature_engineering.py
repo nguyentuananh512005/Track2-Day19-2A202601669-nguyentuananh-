@@ -27,7 +27,9 @@
 
 # %%
 import _setup  # noqa: F401
+import shutil
 import subprocess
+import sys
 import warnings
 from pathlib import Path
 
@@ -40,6 +42,7 @@ from app.features import (auc, frequency_encode, generate_events, latest_join,
                           window_aggregates)
 
 ROOT = Path(_setup.__file__).resolve().parent.parent
+FEAST_BIN = shutil.which("feast") or (str(Path(sys.executable).parent / "feast.exe") if (Path(sys.executable).parent / "feast.exe").exists() else str(Path(sys.executable).parent / "feast"))
 
 # %% [markdown]
 # ## 1. Event log
@@ -158,10 +161,10 @@ print(f"\n'lift ảo' sẽ mất khi lên production: {auc_lat - auc_pit:+.3f} A
 
 # %%
 repo = ROOT / "app" / "feast_repo_ondemand"
-subprocess.run(["python", str(ROOT / "scripts" / "gen_spend.py")], check=True,
+subprocess.run([sys.executable, str(ROOT / "scripts" / "gen_spend.py")], check=True,
                capture_output=True)
-subprocess.run(["feast", "apply"], cwd=repo, check=True, capture_output=True)
-subprocess.run(["feast", "materialize-incremental", "2027-01-01T00:00:00"],
+subprocess.run([FEAST_BIN, "apply"], cwd=repo, check=True, capture_output=True)
+subprocess.run([FEAST_BIN, "materialize-incremental", "2027-01-01T00:00:00"],
                cwd=repo, check=True, capture_output=True)
 print("feast apply + materialize OK")
 
